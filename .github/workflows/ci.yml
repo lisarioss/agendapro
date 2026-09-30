@@ -1,8 +1,16 @@
 name: AgendaPro CI
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore: ['docs/**', 'README.md', 'VALIDATION.md']
+  pull_request:
+    paths-ignore: ['docs/**', 'README.md', 'VALIDATION.md']
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
@@ -27,3 +35,24 @@ jobs:
         with:
           name: agendapro
           path: target/agendapro-1.0.0.jar
+  docker-smoke:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: agendapro-test-ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar segredos efemeros de teste
+        run: |
+          printf 'DB_PASSWORD=%s\nJWT_SECRET=%s\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 48)" > .env
+      - name: Construir e iniciar containers
+        run: docker compose up --build -d
+      - name: Verificar API e persistencia PostgreSQL
+        run: python3 scripts/docker_smoke.py
+      - name: Coletar diagnosticos em caso de falha
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Limpar ambiente efemero
+        if: always()
+        run: docker compose down -v

@@ -2,6 +2,20 @@
 
 Sistema de agendamento multi-tenant em Java 21 e Spring Boot 3.5.16, com API REST, interface web, autenticação JWT e PostgreSQL. Cada empresa mantém seus clientes, profissionais, serviços e agenda isolados.
 
+[![AgendaPro CI](https://github.com/lisarioss/agendapro/actions/workflows/ci.yml/badge.svg)](https://github.com/lisarioss/agendapro/actions/workflows/ci.yml)
+
+## Interface
+
+Agenda com filtros, estados dos atendimentos e consulta de horários disponíveis:
+
+![Agenda do AgendaPro com atendimentos e filtros](docs/screenshots/agenda.png)
+
+Cadastro de clientes da empresa:
+
+![Cadastro de clientes do AgendaPro](docs/screenshots/clientes.png)
+
+As capturas usam dados fictícios do modo de demonstração.
+
 ## Experimentar agora no Windows
 
 O pacote ZIP da entrega inclui `agendapro.jar`, já compilado. No repositório Git, o JAR não é versionado: `demo.ps1` compila o projeto automaticamente com o Maven Wrapper quando necessário. Tenha Java 21 e, para a primeira compilação, acesso à internet:
@@ -36,6 +50,8 @@ docker compose logs -f app
 `setup.ps1` cria `.env` com senha do banco e chave JWT aleatórias e preserva um `.env` existente. O Compose inicia PostgreSQL e aplicação; o Flyway aplica as migrações automaticamente. Abra `http://localhost:8080` e use **Criar empresa**. Não há conta predefinida fora do demo.
 
 Os dados ficam no volume `postgres_data`. `docker compose down` para os serviços e preserva o volume. Não use `down -v` se quiser manter os dados. O banco não publica porta no host; a aplicação publica apenas em localhost.
+
+Para alterar a porta local, adicione `APP_PORT=8089` ao `.env` e recrie os serviços com `docker compose up -d`. A interface estará em `http://localhost:8089`.
 
 Para usar PostgreSQL já instalado, crie um banco vazio `agendapro`, configure as variáveis no PowerShell e execute o JAR:
 
@@ -117,6 +133,10 @@ Esse comando executa a suíte H2. Os testes PostgreSQL ficam desabilitados quand
 ```powershell
 .\test-postgres.ps1
 ```
+
+O GitHub Actions executa essas duas suítes e também o job **docker-smoke**: constrói a imagem, inicia o Compose, cria cadastros e uma reserva, rejeita um conflito, recria os containers sem apagar o volume e confirma a persistência da senha, cliente, agendamento e histórico. Também verifica o isolamento entre empresas pela API real. Alterações apenas no README/documentação não repetem a compilação; o workflow pode ser iniciado manualmente em Actions.
+
+O teste de containers está em `scripts/docker_smoke.py` e deve ser usado em um projeto Compose de testes separado (`COMPOSE_PROJECT_NAME=agendapro-test`), pois recria os serviços `db` e `app`. Ele não usa o modo demo.
 
 Ou, com um banco de testes existente:
 

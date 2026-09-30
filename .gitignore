@@ -6,3 +6,5 @@ target/
 data/
 agendapro.jar
 SHA256SUMS
+__pycache__/
+*.pyc

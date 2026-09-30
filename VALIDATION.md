@@ -25,7 +25,13 @@ A aplicação foi iniciada em modo demo, no endereço `http://localhost:8088`, p
 - Carregamento e salvamento de serviços vinculados e jornada semanal.
 - Cadastro de um novo cliente e exibição na listagem.
 
-O JavaScript também passou na verificação de sintaxe `node --check`. A captura da interface acompanha a entrega em `agendapro-preview.png`.
+O JavaScript também passou na verificação de sintaxe `node --check`. Capturas com dados fictícios estão em `docs/screenshots/agenda.png` e `docs/screenshots/clientes.png`, exibidas no README.
+
+## GitHub Actions
+
+O [primeiro workflow](https://github.com/lisarioss/agendapro/actions/runs/36758094290), referente ao commit `4f50efd`, terminou com sucesso no GitHub. Ele executou a compilação e as suítes H2/PostgreSQL e gerou o artefato JAR.
+
+O workflow agora também inclui `docker-smoke`, que constrói a imagem, inicia os containers, exercita a API e recria `db`/`app` preservando o volume para verificar a persistência dos dados. O resultado dessa execução será registrado após a conclusão.
 
 ## Limites desta verificação
 
