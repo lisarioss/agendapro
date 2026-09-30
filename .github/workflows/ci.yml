@@ -1,0 +1,29 @@
+name: AgendaPro CI
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: agendapro_test
+          POSTGRES_USER: agendapro
+          POSTGRES_PASSWORD: agendapro
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agendapro -d agendapro_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: chmod +x mvnw
+      - run: ./mvnw -B -ntp verify -Dpg.tests=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agendapro
+          path: target/agendapro-1.0.0.jar

@@ -1,0 +1,8 @@
+target/
+.env
+.idea/
+.vscode/
+*.log
+data/
+agendapro.jar
+SHA256SUMS

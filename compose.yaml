@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: agendapro
+      POSTGRES_USER: agendapro
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD no arquivo .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agendapro -d agendapro"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/agendapro
+      DB_USERNAME: agendapro
+      DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD no arquivo .env}
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET no arquivo .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db-test:
+    image: postgres:17-bookworm
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: agendapro_test
+      POSTGRES_USER: agendapro
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:55433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agendapro -d agendapro_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  postgres_data:
