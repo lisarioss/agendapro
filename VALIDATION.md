@@ -31,8 +31,26 @@ O JavaScript também passou na verificação de sintaxe `node --check`. Capturas
 
 O [primeiro workflow](https://github.com/lisarioss/agendapro/actions/runs/36758094290), referente ao commit `4f50efd`, terminou com sucesso no GitHub. Ele executou a compilação e as suítes H2/PostgreSQL e gerou o artefato JAR.
 
-O workflow agora também inclui `docker-smoke`, que constrói a imagem, inicia os containers, exercita a API e recria `db`/`app` preservando o volume para verificar a persistência dos dados. O resultado dessa execução será registrado após a conclusão.
+O [workflow do commit `bcf7bee`](https://github.com/lisarioss/agendapro/actions/runs/36759364097) também terminou com sucesso. O job `verify` executou os 21 testes com zero falhas, erros ou testes ignorados. O job `docker-smoke` construiu a imagem e executou o Compose em um runner Linux do GitHub com PostgreSQL.
+
+O teste de containers confirmou:
+
+- Saúde da aplicação e do banco, cadastro de empresa, login, clientes, profissionais e serviços.
+- Consulta de disponibilidade, criação e confirmação de reserva.
+- Rejeição de uma segunda reserva no mesmo horário com HTTP 409.
+- Recriação dos containers `db` e `app`, preservando o volume nomeado.
+- Persistência da empresa, credenciais, cliente, reserva confirmada e dois eventos de histórico.
+- Preservação do bloqueio de horário após recriar os serviços.
+- Rejeição de acesso de outra empresa ao cliente e ao agendamento com HTTP 404.
+
+Trechos do log Docker:
+
+```text
+OK: saude, cadastro, login, disponibilidade, reserva e conflito no container.
+OK: empresa, senha, cliente, reserva, historico e bloqueio de horario preservados apos recriar db/app.
+OK: isolamento entre empresas no ambiente Docker/PostgreSQL.
+```
 
 ## Limites desta verificação
 
-Docker não estava instalado; Dockerfile, Compose e workflow CI foram incluídos, mas não executados neste computador. O projeto não foi publicado em hospedagem externa. Os testes PostgreSQL foram executados com uma distribuição temporária local, apenas para validação. A prévia usa H2 em memória e não constitui ambiente persistente de produção.
+Docker não está instalado neste computador; a execução Docker foi validada no GitHub Actions. O projeto não foi publicado em hospedagem externa. Os testes PostgreSQL também foram executados com uma distribuição temporária local, apenas para validação. A prévia em localhost:8088 continua usando H2 em memória e não constitui ambiente persistente de produção.

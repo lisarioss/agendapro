@@ -158,7 +158,7 @@ As transações de reservas, jornadas e folgas bloqueiam a linha do profissional
 
 ## Publicação
 
-O projeto inclui Docker e está pronto para execução local. **Não foi publicado em um servidor externo.** Docker não estava disponível no ambiente de entrega; o Dockerfile e Compose não foram executados aqui. A aplicação e as migrações foram executadas diretamente com Java e PostgreSQL; veja [VALIDATION.md](VALIDATION.md).
+O projeto inclui Docker e está pronto para execução local. **Não foi publicado em um servidor externo.** A construção da imagem, execução do Compose e persistência PostgreSQL foram [validadas no GitHub Actions](https://github.com/lisarioss/agendapro/actions/runs/36759364097). Docker não está instalado no computador da entrega; a prévia local continua usando H2 em memória. A aplicação e as migrações também foram executadas diretamente com Java e PostgreSQL; veja [VALIDATION.md](VALIDATION.md).
 
 Para disponibilizar a aplicação na internet, configure domínio, HTTPS no proxy, segredos privados, backups do PostgreSQL e restauração testada. Não habilite o profile `demo`. A chave JWT deve ser diferente em cada ambiente. O limite de autenticação é local: 30 tentativas de login/cadastro por IP a cada 15 minutos; com múltiplas réplicas, configure um limite compartilhado no gateway. O cadastro de empresas é público nesta versão; para um serviço restrito, proteja ou desabilite `/api/auth/register` no gateway.
 
